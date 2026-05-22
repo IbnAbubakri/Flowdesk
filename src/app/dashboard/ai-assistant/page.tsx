@@ -33,17 +33,29 @@ export default function AIAssistantPage() {
     }
   }, [chat, loading]);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     const q = text || prompt;
     if (!q.trim()) return;
     setChat(prev => [...prev, { role: "user", text: q }]);
     setLoading(true);
     setPrompt("");
-    setTimeout(() => {
-      const response = mockResponses[q] || "I can help you with that. Try asking about unpaid customers, today's conversations, or revenue.";
-      setChat(prev => [...prev, { role: "ai", text: response }]);
-      setLoading(false);
-    }, 1200);
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await fetch(`${apiBase}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: q,
+          history: chat.map(m => ({ role: m.role, content: m.text })),
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setChat(prev => [...prev, { role: "ai", text: data.reply }]);
+    } catch {
+      setChat(prev => [...prev, { role: "ai", text: "Sorry, I couldn't reach the AI. Make sure the backend server is running on port 3001." }]);
+    }
+    setLoading(false);
   };
 
   return (

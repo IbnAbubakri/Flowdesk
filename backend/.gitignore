@@ -1,0 +1,4 @@
+auth_info/
+*.db
+*.db-wal
+*.db-shm
