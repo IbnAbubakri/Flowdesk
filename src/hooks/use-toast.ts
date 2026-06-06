@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 
 export interface Toast {
   id: string
@@ -9,16 +9,57 @@ export interface Toast {
   variant?: "default" | "success" | "destructive"
 }
 
-export function useToast() {
-  const [toasts, setToasts] = useState<Toast[]>([])
+type ToastAction = { type: "ADD_TOAST"; toast: Toast } | { type: "DISMISS_TOAST"; toastId: string }
 
-  const toast = useCallback((t: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).slice(2)
-    setToasts(prev => [...prev, { ...t, id }])
-    setTimeout(() => {
-      setToasts(prev => prev.filter(x => x.id !== id))
-    }, 4000)
+let count = 0
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
+}
+
+interface State {
+  toasts: Toast[]
+}
+
+const memoryState: State = { toasts: [] }
+type Listener = (state: State) => void
+const listeners: Listener[] = []
+
+function dispatch(action: ToastAction) {
+  switch (action.type) {
+    case "ADD_TOAST":
+      memoryState.toasts = [...memoryState.toasts, action.toast]
+      break
+    case "DISMISS_TOAST":
+      memoryState.toasts = memoryState.toasts.filter((t) => t.id !== action.toastId)
+      break
+  }
+  listeners.forEach((listener) => listener(memoryState))
+}
+
+export function toast(t: Omit<Toast, "id">) {
+  const id = genId()
+  dispatch({ type: "ADD_TOAST", toast: { ...t, id } })
+  setTimeout(() => {
+    dispatch({ type: "DISMISS_TOAST", toastId: id })
+  }, 4000)
+  return id
+}
+
+export function useToast() {
+  const [state, setState] = useState<State>(memoryState)
+
+  useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) listeners.splice(index, 1)
+    }
   }, [])
 
-  return { toast, toasts }
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
 }

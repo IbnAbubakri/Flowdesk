@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,18 +7,20 @@ import { mockData } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
 import { Wallet, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
 const statusBadge: Record<string, "success" | "danger" | "warning"> = { paid: "success", unpaid: "danger", pending: "warning" };
 
 export default function PaymentsPage() {
-  const paid = mockData.payments.filter(p => p.status === "paid").reduce((s, p) => s + p.amount, 0);
-  const unpaid = mockData.payments.filter(p => p.status === "unpaid").reduce((s, p) => s + p.amount, 0);
-  const pending = mockData.payments.filter(p => p.status === "pending").reduce((s, p) => s + p.amount, 0);
+  const [payments, setPayments] = useState(mockData.payments);
+  const paid = payments.filter(p => p.status === "paid").reduce((s, p) => s + p.amount, 0);
+  const unpaid = payments.filter(p => p.status === "unpaid").reduce((s, p) => s + p.amount, 0);
+  const pending = payments.filter(p => p.status === "pending").reduce((s, p) => s + p.amount, 0);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Payments</h1>
+        <h1 className="text-2xl font-bold text-foreground font-heading">Payments</h1>
         <p className="text-sm text-muted-foreground mt-1">Track payments, invoices, and revenue</p>
       </div>
 
@@ -53,7 +56,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockData.payments.map((p, i) => (
+                {payments.map((p, i) => (
                   <motion.tr
                     key={p.id}
                     initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
@@ -66,8 +69,8 @@ export default function PaymentsPage() {
                     <td className="px-4 py-3"><Badge variant={statusBadge[p.status]}>{p.status.charAt(0).toUpperCase() + p.status.slice(1)}</Badge></td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">{new Date(p.date).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      {p.status === "unpaid" && <Button size="sm" variant="outline"><CheckCircle size={12} className="mr-1" /> Mark Paid</Button>}
-                      {p.status === "pending" && <Button size="sm" variant="outline">Confirm</Button>}
+                      {p.status === "unpaid" && <Button size="sm" variant="outline" onClick={() => { setPayments(payments.map(pm => pm.id === p.id ? { ...pm, status: "paid" as const } : pm)); toast({ title: "Marked as Paid", description: `${p.customer} payment marked as paid` }); }}><CheckCircle size={12} className="mr-1" /> Mark Paid</Button>}
+                      {p.status === "pending" && <Button size="sm" variant="outline" onClick={() => { setPayments(payments.map(pm => pm.id === p.id ? { ...pm, status: "paid" as const } : pm)); toast({ title: "Confirmed", description: `${p.customer} payment confirmed` }); }}>Confirm</Button>}
                       {p.status === "paid" && <span className="text-xs text-muted-foreground">Completed</span>}
                     </td>
                   </motion.tr>

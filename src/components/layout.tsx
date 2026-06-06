@@ -11,6 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,13 +41,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">FD</div>
-            <span className="font-bold text-base text-foreground">FlowDesk AI</span>
+            <span className="font-bold text-base text-foreground font-heading">FlowDesk AI</span>
           </Link>
         )}
-        <button onClick={onToggle} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hidden lg:block">
+        <button onClick={onToggle} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hidden lg:block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
-        <button onClick={onMobileClose} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground lg:hidden">
+        <button onClick={onMobileClose} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground lg:hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Close sidebar">
           <X size={18} />
         </button>
       </div>
@@ -59,11 +60,12 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               href={item.href}
               onClick={onMobileClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
+              aria-current={active ? "page" : undefined}
             >
               {active && (
                 <motion.div layoutId="nav-active" className="absolute inset-0 rounded-lg bg-primary/10" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
@@ -77,7 +79,10 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
       <div className="px-3 pb-4 border-t border-border pt-3">
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          role="switch"
+          aria-checked={theme === "dark"}
+          aria-label={mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
         >
           {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           {!collapsed && <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : ""}</span>}
@@ -110,9 +115,9 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                 <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
                   <Link href="/dashboard" className="flex items-center gap-2" onClick={onMobileClose}>
                     <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">FD</div>
-                    <span className="font-bold text-base text-foreground">FlowDesk AI</span>
+                    <span className="font-bold text-base text-foreground font-heading">FlowDesk AI</span>
                   </Link>
-                  <button onClick={onMobileClose} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground">
+                  <button onClick={onMobileClose} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Close menu">
                     <X size={18} />
                   </button>
                 </div>
@@ -125,9 +130,10 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                         href={item.href}
                         onClick={onMobileClose}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         )}
+                        aria-current={active ? "page" : undefined}
                       >
                         <item.icon size={20} />
                         <span>{item.label}</span>
@@ -138,7 +144,10 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                 <div className="px-3 pb-4 border-t border-border pt-3">
                   <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent"
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    role="switch"
+                    aria-checked={theme === "dark"}
+                    aria-label={mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
                   >
                     {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
                     <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : ""}</span>
@@ -154,23 +163,29 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
 }
 
 export function TopNav({ onMenuToggle }: { onMenuToggle: () => void }) {
+  const [search, setSearch] = useState("");
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-3">
-        <button onClick={onMenuToggle} className="p-2 rounded-lg hover:bg-accent text-muted-foreground lg:hidden">
+        <button onClick={onMenuToggle} className="p-2 rounded-lg hover:bg-accent text-muted-foreground lg:hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Open menu">
           <Menu size={20} />
         </button>
         <div className="hidden sm:block relative">
           <svg className="absolute left-3 top-2.5 text-muted-foreground" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <label htmlFor="topnav-search" className="sr-only">Search customers and messages</label>
           <input
+            id="topnav-search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && search.trim() && toast({ title: "Search", description: `Searching for "${search.trim()}" — feature coming soon` })}
             placeholder="Search customers, messages..."
             className="w-56 lg:w-72 h-9 pl-9 pr-3 rounded-lg border border-input bg-muted/50 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background transition-all"
           />
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <span className="hidden sm:inline-flex text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border">
-          🟢 Live Demo
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true" /> Live Demo
         </span>
         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
           A

@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+        <h1 className="text-2xl font-bold text-foreground font-heading">Analytics</h1>
         <p className="text-sm text-muted-foreground mt-1">Track performance and growth metrics</p>
       </div>
 
@@ -39,11 +39,11 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><h3 className="font-semibold text-foreground">Messages Over Time</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Messages Over Time</h3></CardHeader>
           <CardContent><MessagesLineChart /></CardContent>
         </Card>
         <Card>
-          <CardHeader><h3 className="font-semibold text-foreground">Revenue (Monthly)</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Revenue (Monthly)</h3></CardHeader>
           <CardContent><RevenueBarChart /></CardContent>
         </Card>
       </div>

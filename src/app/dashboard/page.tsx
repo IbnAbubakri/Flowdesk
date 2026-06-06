@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageChart, RevenueChart, ConversionChart } from "@/components/charts";
 import { mockData } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Users, MessageSquare, Wallet, Target, Zap } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, MessageSquare, Wallet, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
 const statCards = [
@@ -34,7 +34,7 @@ export default function DashboardPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, Admin</h1>
+        <h1 className="text-2xl font-bold text-foreground font-heading">Welcome back, Admin</h1>
         <p className="text-muted-foreground text-sm mt-1">Here&apos;s what&apos;s happening with your business today.</p>
       </div>
 
@@ -48,8 +48,8 @@ export default function DashboardPage() {
                   <div className={`p-2 rounded-lg ${stat.color}`}><stat.icon size={16} /></div>
                 </div>
                 <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                <div className="flex items-center gap-1 mt-1 text-xs text-green-600">
-                  <TrendingUp size={14} /> {stat.change} from last month
+                <div className={`flex items-center gap-1 mt-1 text-xs ${stat.change.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                  {stat.change.startsWith("+") ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {stat.change} from last month
                 </div>
               </CardContent>
             </Card>
@@ -59,22 +59,22 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <Card className="lg:col-span-2">
-          <CardHeader><h3 className="font-semibold text-foreground">Message Volume (This Week)</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Message Volume (This Week)</h3></CardHeader>
           <CardContent><MessageChart /></CardContent>
         </Card>
         <Card>
-          <CardHeader><h3 className="font-semibold text-foreground">Conversion Funnel</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Conversion Funnel</h3></CardHeader>
           <CardContent><ConversionChart /></CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><h3 className="font-semibold text-foreground">Revenue Trend</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Revenue Trend</h3></CardHeader>
           <CardContent><RevenueChart /></CardContent>
         </Card>
         <Card>
-          <CardHeader><h3 className="font-semibold text-foreground">Recent Activity</h3></CardHeader>
+          <CardHeader><h3 className="font-semibold text-foreground font-heading">Recent Activity</h3></CardHeader>
           <CardContent>
             <div className="space-y-3">
               {recentActivity.map((item, i) => (

@@ -1,12 +1,31 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Send, Phone, Mail, Tag, AlertCircle, MessageCircle } from "lucide-react";
+import { Search, Send, Phone, Mail, AlertCircle, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+interface Conversation {
+  id: number;
+  customer_name: string;
+  customer_phone: string;
+  platform: string;
+  status: string;
+  last_message: string;
+  updated_at: string;
+}
+
+interface Message {
+  id: number;
+  sender: string;
+  text: string;
+  confidence: number | null;
+  escalated: boolean;
+  created_at: string;
+}
 
 function ConfidenceBadge({ confidence, escalated }: { confidence?: number | null; escalated?: boolean }) {
   if (escalated && confidence === null) return <Badge variant="warning">Staff Reply</Badge>;
@@ -18,9 +37,9 @@ function ConfidenceBadge({ confidence, escalated }: { confidence?: number | null
 }
 
 export default function InboxPage() {
-  const [conversations, setConversations] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [search, setSearch] = useState("");
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
@@ -30,14 +49,18 @@ export default function InboxPage() {
     try {
       const r = await fetch(`${API}/api/conversations`);
       if (r.ok) setConversations(await r.json());
-    } catch {}
+    } catch {
+      toast({ title: "Error", description: "Failed to load conversations", variant: "destructive" });
+    }
   }, []);
 
   const fetchMessages = useCallback(async (id: number) => {
     try {
       const r = await fetch(`${API}/api/conversations/${id}/messages`);
       if (r.ok) setMessages(await r.json());
-    } catch {}
+    } catch {
+      toast({ title: "Error", description: "Failed to load messages", variant: "destructive" });
+    }
   }, []);
 
   useEffect(() => { fetchConvs(); }, [fetchConvs]);
@@ -51,15 +74,18 @@ export default function InboxPage() {
     if (!replyText.trim() || !selectedId) return;
     setSending(true);
     try {
-      await fetch(`${API}/api/conversations/${selectedId}/reply`, {
+      const r = await fetch(`${API}/api/conversations/${selectedId}/reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: replyText }),
       });
+      if (!r.ok) throw new Error("Send failed");
       setReplyText("");
       await fetchMessages(selectedId);
       await fetchConvs();
-    } catch {}
+    } catch {
+      toast({ title: "Error", description: "Failed to send message", variant: "destructive" });
+    }
     setSending(false);
   };
 
@@ -77,7 +103,9 @@ export default function InboxPage() {
         <div className="p-3 border-b border-border">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
+            <label htmlFor="inbox-search" className="sr-only">Search conversations</label>
             <input
+              id="inbox-search"
               placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}
               className="w-full h-9 pl-9 pr-3 rounded-lg border border-input bg-muted/50 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background transition-all"
             />
@@ -88,7 +116,12 @@ export default function InboxPage() {
             <div
               key={c.id}
               onClick={() => setSelectedId(c.id)}
-              className={`p-3 border-b border-border cursor-pointer hover:bg-accent transition-colors ${selectedId === c.id ? "bg-primary/5 border-l-2 border-l-primary" : ""}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedId(c.id); } }}
+              tabIndex={0}
+              role="button"
+              className={`p-3 border-b border-border cursor-pointer hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${selectedId === c.id ? "bg-primary/5 border-l-2 border-l-primary" : ""}`}
+              aria-label={`Select conversation with ${c.customer_name}`}
+              aria-current={selectedId === c.id ? "true" : undefined}
             >
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold shrink-0">
@@ -99,10 +132,9 @@ export default function InboxPage() {
                     <span className="text-sm font-medium text-foreground truncate">{c.customer_name}</span>
                     <span className="text-[10px] text-muted-foreground">{c.updated_at?.slice(5, 16) || ""}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    {c.last_sender === "ai" ? "🤖 " : c.last_sender === "staff" ? "👤 " : ""}
-                    {c.last_message || ""}
-                  </p>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      {c.last_message || ""}
+                    </p>
                 </div>
               </div>
             </div>
@@ -130,7 +162,7 @@ export default function InboxPage() {
                   </div>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast({ title: "Escalated", description: `${selected.customer_name} has been escalated to staff` })} aria-label="Escalate conversation">
                 <AlertCircle size={14} className="mr-1.5" /> Escalate
               </Button>
             </div>
@@ -171,14 +203,16 @@ export default function InboxPage() {
             </div>
             <div className="p-4 border-t border-border">
               <div className="flex gap-2">
+                <label htmlFor="inbox-reply" className="sr-only">Type your reply</label>
                 <input
+                  id="inbox-reply"
                   value={replyText}
                   onChange={e => setReplyText(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend()}
                   placeholder="Type a message..."
                   className="flex-1 h-11 px-4 rounded-xl border border-input bg-muted/50 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background transition-all"
                 />
-                <Button className="h-11 w-11 p-0 rounded-xl" onClick={handleSend} disabled={sending}>
+                <Button className="h-11 w-11 p-0 rounded-xl" onClick={handleSend} disabled={sending} aria-label="Send message">
                   <Send size={18} />
                 </Button>
               </div>

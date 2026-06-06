@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Settings2, Bell, Users, CreditCard, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
 const businessData = {
   name: "Graceville International School",
@@ -31,12 +32,12 @@ const businessData = {
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(true);
+  const [autoReply, setAutoReply] = useState(true);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <h1 className="text-2xl font-bold text-foreground font-heading">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your business and AI settings</p>
       </div>
 
@@ -45,7 +46,7 @@ export default function SettingsPage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"><Settings2 size={20} /></div>
-            <h3 className="font-semibold text-foreground">Business Information</h3>
+            <h3 className="font-semibold text-foreground font-heading">Business Information</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[ 
@@ -71,7 +72,7 @@ export default function SettingsPage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"><Bell size={20} /></div>
-            <h3 className="font-semibold text-foreground">AI Behavior</h3>
+            <h3 className="font-semibold text-foreground font-heading">AI Behavior</h3>
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -79,9 +80,15 @@ export default function SettingsPage() {
                 <span className="text-sm font-medium text-foreground">Auto-Reply</span>
                 <p className="text-xs text-muted-foreground">Allow AI to automatically reply to customer messages</p>
               </div>
-              <div className="relative inline-flex h-5 w-9 items-center rounded-full bg-primary cursor-pointer">
-                <span className="inline-block h-3.5 w-3.5 translate-x-4 transform rounded-full bg-white shadow-sm transition-transform" />
-              </div>
+              <button
+                onClick={() => setAutoReply(!autoReply)}
+                role="switch"
+                aria-checked={autoReply}
+                aria-label="Toggle auto-reply"
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${autoReply ? "bg-primary" : "bg-input"}`}
+              >
+                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${autoReply ? "translate-x-4" : "translate-x-1"}`} />
+              </button>
             </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">AI Tone</label>
@@ -102,9 +109,9 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"><Users size={20} /></div>
-              <h3 className="font-semibold text-foreground">Team Members</h3>
+              <h3 className="font-semibold text-foreground font-heading">Team Members</h3>
             </div>
-            <Button size="sm" variant="outline">Invite Member</Button>
+            <Button size="sm" variant="outline" onClick={() => toast({ title: "Coming soon", description: "Invite member feature will be available in the next update" })}>Invite Member</Button>
           </div>
           <div className="space-y-2">
             {businessData.team.map(m => (
@@ -130,9 +137,9 @@ export default function SettingsPage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-              {mounted && theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </div>
-            <h3 className="font-semibold text-foreground">Appearance</h3>
+            <h3 className="font-semibold text-foreground font-heading">Appearance</h3>
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -141,9 +148,12 @@ export default function SettingsPage() {
             </div>
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${theme === "dark" ? "bg-primary" : "bg-input"}`}
+              role="switch"
+              aria-checked={theme === "dark"}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${theme === "dark" ? "bg-primary" : "bg-input"}`}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${theme === "dark" ? "translate-x-6" : "translate-x-1"}`} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${theme === "dark" ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
         </CardContent>
@@ -154,7 +164,7 @@ export default function SettingsPage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"><CreditCard size={20} /></div>
-            <h3 className="font-semibold text-foreground">Subscription</h3>
+            <h3 className="font-semibold text-foreground font-heading">Subscription</h3>
           </div>
           <div className="space-y-3">
             {Object.entries(businessData.pricing).map(([key, tier]) => (

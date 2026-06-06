@@ -1,5 +1,6 @@
 "use client";
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useTheme } from "next-themes";
 
 const messageData = [
   { name: "Mon", messages: 120 }, { name: "Tue", messages: 145 }, { name: "Wed", messages: 132 },
@@ -20,8 +21,8 @@ const conversionData = [
 const COLORS = ["#3b82f6", "#60a5fa", "#93c5fd", "#2563eb"];
 
 function useThemeColors() {
-  if (typeof window === "undefined") return { grid: "#f0f0f0", text: "#9ca3af" };
-  const isDark = document.documentElement.classList.contains("dark");
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   return isDark ? { grid: "#374151", text: "#9ca3af" } : { grid: "#f0f0f0", text: "#9ca3af" };
 }
 
@@ -39,7 +40,7 @@ export function MessageChart() {
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
         <XAxis dataKey="name" tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
+        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
         <Area type="monotone" dataKey="messages" stroke="#3b82f6" strokeWidth={2} fill="url(#msgGrad)" />
       </AreaChart>
     </ResponsiveContainer>
@@ -54,7 +55,7 @@ export function RevenueChart() {
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
         <XAxis dataKey="name" tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }} />
+        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
         <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
@@ -69,7 +70,7 @@ export function ConversionChart() {
         <Pie data={conversionData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
           {conversionData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
         </Pie>
-        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }} />
+        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -83,7 +84,7 @@ export function MessagesLineChart() {
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
         <XAxis dataKey="name" tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }} />
+        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
         <Line type="monotone" dataKey="messages" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4, fill: "#3b82f6" }} />
       </LineChart>
     </ResponsiveContainer>
@@ -98,7 +99,7 @@ export function RevenueBarChart() {
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
         <XAxis dataKey="name" tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: c.text }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)" }} />
+        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
         <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>

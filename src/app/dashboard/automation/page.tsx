@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockData } from "@/lib/mock-data";
-import { Plus, Zap, Clock, AlertTriangle, MessageSquare } from "lucide-react";
+import { Plus, Zap, Clock, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const typeIcons: Record<string, typeof Zap> = { auto_reply: Zap, follow_up: Clock, scheduled: Clock, keyword: AlertTriangle };
@@ -26,10 +27,10 @@ export default function AutomationPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Automation</h1>
+          <h1 className="text-2xl font-bold text-foreground font-heading">Automation</h1>
           <p className="text-sm text-muted-foreground mt-1">Automate WhatsApp replies, follow-ups, and escalations</p>
         </div>
-        <Button><Plus size={16} className="mr-1" /> Add Rule</Button>
+        <Button onClick={() => toast({ title: "Coming soon", description: "Rule creation will be available in the next update" })}><Plus size={16} className="mr-1" /> Add Rule</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -77,12 +78,15 @@ export default function AutomationPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant={rule.enabled ? "success" : "outline"}>{rule.enabled ? "Active" : "Disabled"}</Badge>
-                      <button
-                        onClick={() => toggleRule(rule.id)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${rule.enabled ? "bg-primary" : "bg-input"}`}
-                      >
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm ${rule.enabled ? "translate-x-4" : "translate-x-1"}`} />
-                      </button>
+                        <button
+                          onClick={() => toggleRule(rule.id)}
+                          role="switch"
+                          aria-checked={rule.enabled}
+                          aria-label={rule.enabled ? "Disable rule" : "Enable rule"}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${rule.enabled ? "bg-primary" : "bg-input"}`}
+                        >
+                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${rule.enabled ? "translate-x-4" : "translate-x-1"}`} />
+                        </button>
                     </div>
                   </div>
                 </CardContent>

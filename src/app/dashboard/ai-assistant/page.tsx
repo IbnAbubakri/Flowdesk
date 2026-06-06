@@ -13,13 +13,7 @@ const examplePrompts = [
   "List customers who haven't been contacted in a week",
 ];
 
-const mockResponses: Record<string, string> = {
-  "Show me unpaid customers": "Unpaid Customers (2):\n1. Chidi Okonkwo — ₦350,000 (JSS1 Tuition) — Overdue 6 days\n2. Funke Adeyemi — ₦75,000 (Consultation Fee) — Overdue 2 days\n\nTotal outstanding: ₦425,000\n\nWould you like me to send payment reminders?",
-  "Summarize today's conversations": "Today's Activity Summary:\n• 12 conversations handled\n• 10 auto-replied by AI (83% auto-reply rate)\n• 2 escalated to staff\n• 1 new lead captured\n• Avg response time: 1.2s\n\nBusiest hour: 10 AM (23 messages)",
-  "Which leads are inactive?": "Inactive Leads (2):\n1. Funke Adeyemi — Last contacted May 1 (20 days ago)\n2. Ngozi Eze — Last contacted May 19 (2 days ago)\n\nFunke Adeyemi qualifies for 3-day follow-up automation.",
-  "What's our revenue this month?": "May 2026 Revenue:\n• Total Revenue: ₦2,755,000\n• Paid: ₦2,680,000\n• Pending/Unpaid: ₦425,000\n• Monthly Growth: +15%\n\nTop paying customer: Emeka Okafor (₦2,500,000)",
-  "List customers who haven't been contacted in a week": "Customers inactive >7 days:\n1. Funke Adeyemi — Retail — 20 days inactive\n2. Ngozi Eze — Freelancer — 2 days inactive\n\nTip: Your \"3-Day Inactive Follow-Up\" automation is active and will handle re-engagement.",
-};
+
 
 export default function AIAssistantPage() {
   const [prompt, setPrompt] = useState("");
@@ -62,7 +56,7 @@ export default function AIAssistantPage() {
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="flex-1 min-w-0">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">AI Assistant</h1>
+          <h1 className="text-2xl font-bold text-foreground font-heading">AI Assistant</h1>
           <p className="text-sm text-muted-foreground mt-1">Ask questions about your business in plain English</p>
         </div>
 
@@ -74,7 +68,7 @@ export default function AIAssistantPage() {
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
                     <Bot size={32} />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">Ask your business anything</h3>
+                  <h3 className="font-semibold text-foreground mb-2 font-heading">Ask your business anything</h3>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
                     Try asking about customers, revenue, payments, or activity. The AI understands your business data in real-time.
                   </p>
@@ -107,13 +101,15 @@ export default function AIAssistantPage() {
             </div>
             <div className="p-4 border-t border-border">
               <div className="flex gap-2">
+                <label htmlFor="ai-prompt" className="sr-only">Ask the AI assistant</label>
                 <input
+                  id="ai-prompt"
                   value={prompt} onChange={e => setPrompt(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSend(prompt)}
                   placeholder="Ask about your business..."
                   className="flex-1 h-11 px-4 rounded-xl border border-input bg-muted/50 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background transition-all"
                 />
-                <Button className="h-11 w-11 p-0 rounded-xl shrink-0" onClick={() => handleSend(prompt)}>
+                <Button className="h-11 w-11 p-0 rounded-xl shrink-0" onClick={() => handleSend(prompt)} aria-label="Send message">
                   <Send size={18} />
                 </Button>
               </div>
@@ -129,7 +125,7 @@ export default function AIAssistantPage() {
             <button
               key={i}
               onClick={() => handleSend(p)}
-              className="shrink-0 lg:w-full text-left p-3 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-colors"
+              className="shrink-0 lg:w-full text-left p-3 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               &ldquo;{p}&rdquo;
             </button>

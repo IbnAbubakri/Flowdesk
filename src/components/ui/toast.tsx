@@ -27,7 +27,7 @@ const Toast = React.forwardRef<
   <ToastPrimitives.Root
     ref={ref}
     className={cn(
-      "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 shadow-lg transition-all data-[state=open]:animate-slide-in-right data-[state=closed]:animate-fade-out",
+      "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 transition-all data-[state=open]:animate-slide-in-right data-[state=closed]:animate-fade-out",
       className
     )}
     {...props}

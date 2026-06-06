@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ToastProvider, ToastViewport } from "@/components/ui/toast";
+import { AuthProvider } from "@/lib/auth-context";
+import { Toaster } from "@/components/ui/toaster";
+import { MotionConfig } from "framer-motion";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,10 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          <ToastProvider>
-            {children}
-            <ToastViewport />
-          </ToastProvider>
+          <AuthProvider>
+            <MotionConfig reducedMotion="user">
+              {children}
+            </MotionConfig>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
