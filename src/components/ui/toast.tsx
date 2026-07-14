@@ -1,3 +1,6 @@
+// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
+// Faruqsuzay@gmail.com | +2349061345507
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cn } from "@/lib/utils"
