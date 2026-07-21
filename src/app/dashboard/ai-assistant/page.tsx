@@ -1,4 +1,3 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
 // Faruqsuzay@gmail.com | +2349061345507
 
 "use client";
@@ -58,7 +57,7 @@ export default function AIAssistantPage() {
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="flex-1 min-w-0">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground font-heading">AI Assistant</h1>
+          <h1 className="text-2xl font-bold text-foreground">AI Assistant</h1>
           <p className="text-sm text-muted-foreground mt-1">Ask questions about your business in plain English</p>
         </div>
 
@@ -70,7 +69,7 @@ export default function AIAssistantPage() {
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
                     <Bot size={32} />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2 font-heading">Ask your business anything</h3>
+                  <h3 className="font-semibold text-foreground mb-2">Ask your business anything</h3>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
                     Try asking about customers, revenue, payments, or activity. The AI understands your business data in real-time.
                   </p>

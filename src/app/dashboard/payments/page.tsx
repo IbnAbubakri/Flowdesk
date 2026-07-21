@@ -1,4 +1,3 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
 // Faruqsuzay@gmail.com | +2349061345507
 
 "use client";
@@ -23,7 +22,7 @@ export default function PaymentsPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground font-heading">Payments</h1>
+        <h1 className="text-2xl font-bold text-foreground">Payments</h1>
         <p className="text-sm text-muted-foreground mt-1">Track payments, invoices, and revenue</p>
       </div>
 

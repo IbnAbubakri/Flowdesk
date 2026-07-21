@@ -1,11 +1,7 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
-// Faruqsuzay@gmail.com | +2349061345507
-
 "use client";
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,6 +21,45 @@ const statusColors: Record<string, "success" | "warning" | "default" | "danger">
 };
 
 const PAGE_SIZE = 5;
+
+function CustomerCard({ customer }: { customer: Customer }) {
+  return (
+    <div className="p-4 border-b border-border last:border-0">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold shrink-0">
+            {customer.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+          </div>
+          <div>
+            <span className="text-sm font-medium text-foreground block">{customer.name}</span>
+            <span className="text-xs text-muted-foreground">{customer.email || ""}</span>
+          </div>
+        </div>
+        <Badge variant={statusColors[customer.status]}>{customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}</Badge>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs mt-3">
+        <div>
+          <span className="text-muted-foreground">Phone</span>
+          <p className="text-foreground">{customer.phone || "—"}</p>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Last Contacted</span>
+          <p className="text-foreground">{customer.last_contacted ? new Date(customer.last_contacted).toLocaleDateString() : "—"}</p>
+        </div>
+      </div>
+      {customer.last_message && (
+        <p className="text-xs text-muted-foreground mt-2 truncate">Last: {customer.last_message}</p>
+      )}
+      {customer.tags && customer.tags.length > 0 && (
+        <div className="flex gap-1 flex-wrap mt-2">
+          {customer.tags.map(t => (
+            <span key={t} className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">{t}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -62,22 +97,42 @@ export default function CustomersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading customers...</div>
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-24 mt-2" />
+        </div>
+        <div className="bg-card rounded-xl border border-border">
+          <div className="p-4 border-b border-border">
+            <Skeleton className="h-9 w-full" />
+          </div>
+          <div className="divide-y divide-border">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="p-4 flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground font-heading">Customers</h1>
+          <h1 className="text-2xl font-bold text-foreground">Customers</h1>
           <p className="text-sm text-muted-foreground mt-1">{customers.length} total customers</p>
         </div>
       </div>
 
-      <Card>
+      <div className="bg-card rounded-xl border border-border">
         <div className="flex items-center gap-3 p-4 border-b border-border">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
@@ -103,7 +158,8 @@ export default function CustomersPage() {
           </select>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
@@ -117,7 +173,7 @@ export default function CustomersPage() {
                 <motion.tr
                   key={c.id}
                   initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
+                  transition={{ delay: i * 0.03, duration: 0.15 }}
                   className="border-b border-border/50 hover:bg-muted/50 transition-colors"
                 >
                   <td className="px-4 py-3">
@@ -148,6 +204,23 @@ export default function CustomersPage() {
           </table>
         </div>
 
+        {/* Mobile cards */}
+        <div className="md:hidden">
+          {paginated.map((c, i) => (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03, duration: 0.15 }}
+            >
+              <CustomerCard customer={c} />
+            </motion.div>
+          ))}
+        </div>
+
+        {paginated.length === 0 && (
+          <div className="p-8 text-center text-muted-foreground text-sm">No customers found</div>
+        )}
+
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <span className="text-xs text-muted-foreground">Showing {paginated.length} of {filtered.length} customers</span>
           <div className="flex gap-1">
@@ -174,7 +247,7 @@ export default function CustomersPage() {
             >Next</button>
           </div>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 }

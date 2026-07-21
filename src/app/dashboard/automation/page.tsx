@@ -1,4 +1,3 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
 // Faruqsuzay@gmail.com | +2349061345507
 
 "use client";
@@ -30,7 +29,7 @@ export default function AutomationPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground font-heading">Automation</h1>
+          <h1 className="text-2xl font-bold text-foreground">Automation</h1>
           <p className="text-sm text-muted-foreground mt-1">Automate WhatsApp replies, follow-ups, and escalations</p>
         </div>
         <Button onClick={() => toast({ title: "Coming soon", description: "Rule creation will be available in the next update" })}><Plus size={16} className="mr-1" /> Add Rule</Button>

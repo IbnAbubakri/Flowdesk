@@ -1,6 +1,3 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
-// Faruqsuzay@gmail.com | +2349061345507
-
 "use client";
 
 import Link from "next/link";
@@ -27,6 +24,16 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
+const sidebarVariants = {
+  open: { x: 0, transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] } },
+  closed: { x: -280, transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] } },
+};
+
+const overlayVariants = {
+  open: { opacity: 1, transition: { duration: 0.2 } },
+  closed: { opacity: 0, transition: { duration: 0.15 } },
+};
+
 export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
   collapsed: boolean; onToggle: () => void; mobileOpen: boolean; onMobileClose: () => void;
 }) {
@@ -37,14 +44,14 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
 
   const sidebarContent = (
     <div className={cn(
-      "flex flex-col h-full bg-card border-r border-border transition-all duration-300",
+      "flex flex-col h-full bg-card border-r border-border transition-all duration-200",
       collapsed ? "w-16" : "w-60"
     )}>
       <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">FD</div>
-            <span className="font-bold text-base text-foreground font-heading">FlowDesk AI</span>
+            <span className="font-bold text-base text-foreground">FlowDesk AI</span>
           </Link>
         )}
         <button onClick={onToggle} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hidden lg:block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
@@ -63,7 +70,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               href={item.href}
               onClick={onMobileClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -71,7 +78,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               aria-current={active ? "page" : undefined}
             >
               {active && (
-                <motion.div layoutId="nav-active" className="absolute inset-0 rounded-lg bg-primary/10" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
+                <motion.div layoutId="nav-active" className="absolute inset-0 rounded-lg bg-primary/10" transition={{ duration: 0.15, ease: "easeOut" }} />
               )}
               <item.icon size={20} className="relative z-10" />
               {!collapsed && <span className="relative z-10">{item.label}</span>}
@@ -105,20 +112,25 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
         {mobileOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              variants={overlayVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
               className="fixed inset-0 z-40 bg-black/50 lg:hidden"
               onClick={onMobileClose}
             />
             <motion.aside
-              initial={{ x: -300 }} animate={{ x: 0 }} exit={{ x: -300 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              variants={sidebarVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
               className="fixed left-0 top-0 z-50 h-screen lg:hidden"
             >
               <div className="flex flex-col h-full bg-card border-r border-border w-60">
                 <div className="flex items-center justify-between h-16 px-4 border-b border-border shrink-0">
                   <Link href="/dashboard" className="flex items-center gap-2" onClick={onMobileClose}>
                     <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-bold">FD</div>
-                    <span className="font-bold text-base text-foreground font-heading">FlowDesk AI</span>
+                    <span className="font-bold text-base text-foreground">FlowDesk AI</span>
                   </Link>
                   <button onClick={onMobileClose} className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Close menu">
                     <X size={18} />
@@ -133,7 +145,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                         href={item.href}
                         onClick={onMobileClose}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         )}
                         aria-current={active ? "page" : undefined}

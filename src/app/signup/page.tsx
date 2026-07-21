@@ -1,4 +1,3 @@
-// © 2026 Abubakri Faaruq Adebowale (IbnAbubakri). All rights reserved.
 // Faruqsuzay@gmail.com | +2349061345507
 
 "use client";
@@ -45,11 +44,11 @@ export default function SignupPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary text-white text-xl font-bold mb-4">
             FD
           </div>
-          <h1 className="text-2xl font-bold text-foreground font-heading">Get Started</h1>
+          <h1 className="text-2xl font-bold text-foreground">Get Started</h1>
           <p className="text-muted-foreground mt-1 text-sm">Create your FlowDesk AI account</p>
         </div>
         <div className="bg-card rounded-2xl border border-border p-8">
-          <h2 className="text-lg font-semibold text-foreground mb-6 font-heading">Create account</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-6">Create account</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="signup-name" className="block text-sm font-medium text-foreground/80 mb-1.5">Business Name</label>
