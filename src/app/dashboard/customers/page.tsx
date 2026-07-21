@@ -2,13 +2,23 @@
 // Faruqsuzay@gmail.com | +2349061345507
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { mockData } from "@/lib/mock-data";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
+
+interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  status: string;
+  tags: string[];
+  last_message: string;
+  last_contacted: string;
+}
 
 const statusColors: Record<string, "success" | "warning" | "default" | "danger"> = {
   active: "success", lead: "warning", converted: "default", inactive: "danger",
@@ -17,12 +27,31 @@ const statusColors: Record<string, "success" | "warning" | "default" | "danger">
 const PAGE_SIZE = 5;
 
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockData.customers.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search) || c.email.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await fetch("/api/customers");
+        if (res.ok) {
+          const data = await res.json();
+          setCustomers(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCustomers();
+  }, []);
+
+  const filtered = customers.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search) || c.email?.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filter === "all" || c.status === filter;
     return matchesSearch && matchesFilter;
   });
@@ -31,12 +60,20 @@ export default function CustomersPage() {
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice(0, safePage * PAGE_SIZE).slice(-PAGE_SIZE);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Loading customers...</div>
+      </div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground font-heading">Customers</h1>
-          <p className="text-sm text-muted-foreground mt-1">{mockData.stats.totalCustomers} total customers</p>
+          <p className="text-sm text-muted-foreground mt-1">{customers.length} total customers</p>
         </div>
       </div>
 
@@ -90,21 +127,21 @@ export default function CustomersPage() {
                       </div>
                       <div>
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
-                        <span className="text-xs text-muted-foreground block">{c.email}</span>
+                        <span className="text-xs text-muted-foreground block">{c.email || ""}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{c.phone}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{c.phone || "—"}</td>
                   <td className="px-4 py-3"><Badge variant={statusColors[c.status]}>{c.status.charAt(0).toUpperCase() + c.status.slice(1)}</Badge></td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
-                      {c.tags.map(t => (
+                      {(c.tags || []).map(t => (
                         <span key={t} className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">{t}</span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{new Date(c.lastContacted).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-[200px] truncate">{c.lastMessage}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">{c.last_contacted ? new Date(c.last_contacted).toLocaleDateString() : "—"}</td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-[200px] truncate">{c.last_message || "—"}</td>
                 </motion.tr>
               ))}
             </tbody>

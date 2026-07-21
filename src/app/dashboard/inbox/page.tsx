@@ -9,8 +9,6 @@ import { Search, Send, Phone, Mail, AlertCircle, MessageCircle } from "lucide-re
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
 interface Conversation {
   id: number;
   customer_name: string;
@@ -50,7 +48,7 @@ export default function InboxPage() {
 
   const fetchConvs = useCallback(async () => {
     try {
-      const r = await fetch(`${API}/api/conversations`);
+      const r = await fetch("/api/conversations");
       if (r.ok) setConversations(await r.json());
     } catch {
       toast({ title: "Error", description: "Failed to load conversations", variant: "destructive" });
@@ -59,7 +57,7 @@ export default function InboxPage() {
 
   const fetchMessages = useCallback(async (id: number) => {
     try {
-      const r = await fetch(`${API}/api/conversations/${id}/messages`);
+      const r = await fetch(`/api/conversations/${id}/messages`);
       if (r.ok) setMessages(await r.json());
     } catch {
       toast({ title: "Error", description: "Failed to load messages", variant: "destructive" });
@@ -77,7 +75,7 @@ export default function InboxPage() {
     if (!replyText.trim() || !selectedId) return;
     setSending(true);
     try {
-      const r = await fetch(`${API}/api/conversations/${selectedId}/reply`, {
+      const r = await fetch(`/api/conversations/${selectedId}/reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: replyText }),

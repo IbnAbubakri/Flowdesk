@@ -37,8 +37,7 @@ export default function AIAssistantPage() {
     setLoading(true);
     setPrompt("");
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-      const res = await fetch(`${apiBase}/api/chat`, {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,7 +49,7 @@ export default function AIAssistantPage() {
       const data = await res.json();
       setChat(prev => [...prev, { role: "ai", text: data.reply }]);
     } catch {
-      setChat(prev => [...prev, { role: "ai", text: "Sorry, I couldn't reach the AI. Make sure the backend server is running on port 3001." }]);
+      setChat(prev => [...prev, { role: "ai", text: "Sorry, I couldn't reach the AI. Please try again later." }]);
     }
     setLoading(false);
   };
