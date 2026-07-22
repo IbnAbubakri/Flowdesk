@@ -6,12 +6,13 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, MessageSquare, Users, Zap, Wallet, BarChart3,
-  Bot, Settings, ChevronLeft, ChevronRight, Menu, X, Moon, Sun,
+  Bot, Settings, ChevronLeft, ChevronRight, Menu, X, Moon, Sun, LogOut,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -39,8 +40,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
 }) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { signOut } = useAuth();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const sidebarContent = (
     <div className={cn(
@@ -86,7 +92,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
           );
         })}
       </nav>
-      <div className="px-3 pb-4 border-t border-border pt-3">
+      <div className="px-3 pb-4 border-t border-border pt-3 space-y-1">
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -96,6 +102,14 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
         >
           {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           {!collapsed && <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : ""}</span>}
+        </button>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Sign out"
+        >
+          <LogOut size={18} />
+          {!collapsed && <span>Sign out</span>}
         </button>
       </div>
     </div>
@@ -156,7 +170,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                     );
                   })}
                 </nav>
-                <div className="px-3 pb-4 border-t border-border pt-3">
+                <div className="px-3 pb-4 border-t border-border pt-3 space-y-1">
                   <button
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -166,6 +180,14 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
                   >
                     {mounted && theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
                     <span>{mounted ? (theme === "dark" ? "Light Mode" : "Dark Mode") : ""}</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label="Sign out"
+                  >
+                    <LogOut size={18} />
+                    <span>Sign out</span>
                   </button>
                 </div>
               </div>

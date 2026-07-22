@@ -1,21 +1,21 @@
-// Faruqsuzay@gmail.com | +2349061345507
-
 "use client";
-import { ReactNode, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { ReactNode, useState } from "react";
 import { Sidebar, TopNav } from "@/components/layout";
 import { useAuth } from "@/lib/auth-context";
 import { motion } from "framer-motion";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const router = useRouter();
+  const { user, loading } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    if (!user) router.replace("/");
-  }, [user, router]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground text-sm">Loading...</div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <motion.main
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="p-4 lg:p-6"
         >
           {children}

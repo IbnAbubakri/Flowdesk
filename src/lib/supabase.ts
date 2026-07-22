@@ -1,5 +1,14 @@
+import { createBrowserClient } from "@supabase/ssr";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
+export function createSupabaseBrowser() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
+// Legacy client for API routes that don't need auth context
 let supabaseInstance: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient {
@@ -8,7 +17,7 @@ export function getSupabase(): SupabaseClient {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error("Missing Supabase environment variables. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local");
+      throw new Error("Missing Supabase environment variables");
     }
 
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
@@ -16,7 +25,6 @@ export function getSupabase(): SupabaseClient {
   return supabaseInstance;
 }
 
-// For backward compatibility
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_, prop) {
     return (getSupabase() as any)[prop];

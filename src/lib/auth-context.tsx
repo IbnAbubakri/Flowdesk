@@ -1,78 +1,76 @@
-// Faruqsuzay@gmail.com | +2349061345507
-
 "use client";
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
-interface User {
-  name: string;
-  email: string;
-}
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { User, AuthError } from "@supabase/supabase-js";
+import { createSupabaseBrowser } from "@/lib/supabase";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
-  signup: (name: string, email: string, password: string) => boolean;
-  logout: () => void;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error?: AuthError | null }>;
+  signUp: (email: string, password: string, businessName: string) => Promise<{ error?: AuthError | null }>;
+  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-const DEMO_USERS = [
-  { name: "Admin", email: "admin@flowdesk.ai", password: "demo1234" },
-];
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  signIn: async () => ({}),
+  signUp: async () => ({}),
+  signOut: async () => {},
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const supabase = createSupabaseBrowser();
 
   useEffect(() => {
-    const stored = localStorage.getItem("flowdesk_user");
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch { /* ignore */ }
-    }
-    if (!localStorage.getItem("flowdesk_users")) {
-      localStorage.setItem("flowdesk_users", JSON.stringify(DEMO_USERS));
-    }
-    setReady(true);
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, password: string) => {
-    const users = JSON.parse(localStorage.getItem("flowdesk_users") || "[]");
-    const match = users.find((u: User & { password: string }) => u.email === email && u.password === password);
-    if (match) {
-      const u: User = { name: match.name, email: match.email };
-      setUser(u);
-      localStorage.setItem("flowdesk_user", JSON.stringify(u));
-      return true;
-    }
-    return false;
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error };
   };
 
-  const signup = (name: string, email: string, password: string) => {
-    const users = JSON.parse(localStorage.getItem("flowdesk_users") || "[]");
-    if (users.some((u: User) => u.email === email)) return false;
-    users.push({ name, email, password });
-    localStorage.setItem("flowdesk_users", JSON.stringify(users));
-    const u: User = { name, email };
-    setUser(u);
-    localStorage.setItem("flowdesk_user", JSON.stringify(u));
-    return true;
+  const signUp = async (email: string, password: string, businessName: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { business_name: businessName },
+      },
+    });
+    return { error };
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("flowdesk_user");
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
-      {ready ? children : null}
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+      {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  return useContext(AuthContext);
 }
