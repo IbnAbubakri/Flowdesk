@@ -25,6 +25,12 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  const code = request.nextUrl.searchParams.get("code");
+
+  if (code) {
+    await supabase.auth.exchangeCodeForSession(code);
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
