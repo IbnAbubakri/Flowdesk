@@ -25,8 +25,8 @@ const navItems = [
 ];
 
 const sidebarVariants = {
-  open: { x: 0, transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] } },
-  closed: { x: -280, transition: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] } },
+  open: { x: 0, transition: { duration: 0.2, ease: "easeOut" as const } },
+  closed: { x: -280, transition: { duration: 0.15, ease: "easeIn" as const } },
 };
 
 const overlayVariants = {
