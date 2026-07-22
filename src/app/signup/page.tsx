@@ -37,17 +37,34 @@ export default function SignupPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
 
     setLoading(true);
-    const { error: authError } = await signUp(email, password, businessName);
-    setLoading(false);
 
-    if (authError) {
-      setError(authError.message === "User already registered"
-        ? "An account with this email already exists"
-        : authError.message);
-      return;
+    try {
+      const checkRes = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const checkData = await checkRes.json();
+
+      if (checkData.exists) {
+        setLoading(false);
+        setError("An account with this email already exists. Please sign in instead.");
+        return;
+      }
+
+      const { error: authError } = await signUp(email, password, businessName);
+      setLoading(false);
+
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
+
+      setSuccess(true);
+    } catch {
+      setLoading(false);
+      setError("Something went wrong. Please try again.");
     }
-
-    setSuccess(true);
   };
 
   if (authLoading || user) {
