@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 export async function POST(
   request: Request,
@@ -14,24 +14,15 @@ export async function POST(
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
     }
 
-    // Insert staff reply
-    const { error: insertError } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: id,
-        sender: "staff",
-        text,
-      });
+    await sql`
+      INSERT INTO messages (conversation_id, sender, text)
+      VALUES (${id}, 'staff', ${text})
+    `;
 
-    if (insertError) throw insertError;
-
-    // Update conversation timestamp
-    const { error: updateError } = await supabase
-      .from("conversations")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("id", id);
-
-    if (updateError) throw updateError;
+    await sql`
+      UPDATE conversations SET updated_at = NOW()
+      WHERE id = ${id}
+    `;
 
     return NextResponse.json({ ok: true });
   } catch (error) {

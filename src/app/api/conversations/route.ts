@@ -1,51 +1,45 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
-      .from("conversations")
-      .select(`
-        id,
-        customer_id,
-        platform,
-        status,
-        updated_at,
-        customers!inner (
-          name,
-          phone
-        )
-      `)
-      .order("updated_at", { ascending: false });
+    const rows = await sql`
+      SELECT
+        c.id,
+        c.customer_id,
+        c.platform,
+        c.status,
+        c.updated_at,
+        cu.name AS customer_name,
+        cu.phone AS customer_phone,
+        (
+          SELECT m.text FROM messages m
+          WHERE m.conversation_id = c.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_message,
+        (
+          SELECT m.sender FROM messages m
+          WHERE m.conversation_id = c.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_sender
+      FROM conversations c
+      JOIN customers cu ON cu.id = c.customer_id
+      ORDER BY c.updated_at DESC
+    `;
 
-    if (error) throw error;
-
-    // Get last message for each conversation
-    const conversations = await Promise.all(
-      data.map(async (conv) => {
-        const { data: lastMsg } = await supabase
-          .from("messages")
-          .select("text, sender")
-          .eq("conversation_id", conv.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        const customer = Array.isArray(conv.customers) ? conv.customers[0] : conv.customers;
-
-        return {
-          id: conv.id,
-          customer_id: conv.customer_id,
-          customer_name: customer?.name || "Unknown",
-          customer_phone: customer?.phone || "",
-          platform: conv.platform,
-          status: conv.status,
-          last_message: lastMsg?.text || "",
-          last_sender: lastMsg?.sender || "",
-          updated_at: conv.updated_at,
-        };
-      })
-    );
+    const conversations = rows.map((conv: any) => ({
+      id: conv.id,
+      customer_id: conv.customer_id,
+      customer_name: conv.customer_name || "Unknown",
+      customer_phone: conv.customer_phone || "",
+      platform: conv.platform,
+      status: conv.status,
+      last_message: conv.last_message || "",
+      last_sender: conv.last_sender || "",
+      updated_at: conv.updated_at,
+    }));
 
     return NextResponse.json(conversations);
   } catch (error) {

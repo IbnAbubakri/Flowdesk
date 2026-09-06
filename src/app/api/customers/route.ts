@@ -1,43 +1,36 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 export async function GET() {
   try {
-    const { data: customers, error } = await supabase
-      .from("customers")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const data = await sql`
+      SELECT
+        cu.*,
+        (
+          SELECT m.text FROM messages m
+          JOIN conversations c2 ON c2.id = m.conversation_id
+          WHERE c2.customer_id = cu.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_message,
+        (
+          SELECT m.created_at FROM messages m
+          JOIN conversations c2 ON c2.id = m.conversation_id
+          WHERE c2.customer_id = cu.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_contacted
+      FROM customers cu
+      ORDER BY cu.created_at DESC
+    `;
 
-    if (error) throw error;
+    const customers = data.map((customer: any) => ({
+      ...customer,
+      last_message: customer.last_message || "",
+      last_contacted: customer.last_contacted || null,
+    }));
 
-    // Get last message for each customer
-    const customersWithMessages = await Promise.all(
-      customers.map(async (customer) => {
-        const { data: lastMsg } = await supabase
-          .from("messages")
-          .select("text, created_at")
-          .eq("conversation_id", 
-            await supabase
-              .from("conversations")
-              .select("id")
-              .eq("customer_id", customer.id)
-              .limit(1)
-              .single()
-              .then(r => r.data?.id || "")
-          )
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        return {
-          ...customer,
-          last_message: lastMsg?.text || "",
-          last_contacted: lastMsg?.created_at || null,
-        };
-      })
-    );
-
-    return NextResponse.json(customersWithMessages);
+    return NextResponse.json(customers);
   } catch (error) {
     console.error("List customers error:", error);
     return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });

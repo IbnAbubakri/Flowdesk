@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -42,19 +42,16 @@ export async function POST(request: Request) {
     }
 
     // Find or create customer
-    let { data: customer } = await supabase
-      .from("customers")
-      .select("id")
-      .eq("phone", phone)
-      .single();
+    let customer = await sql`
+      SELECT id FROM customers WHERE phone = ${phone} LIMIT 1
+    `.then((rows) => rows[0]);
 
     if (!customer) {
-      const { data: newCustomer } = await supabase
-        .from("customers")
-        .insert({ name: name || phone, phone })
-        .select("id")
-        .single();
-      customer = newCustomer;
+      customer = await sql`
+        INSERT INTO customers (name, phone)
+        VALUES (${name || phone}, ${phone})
+        RETURNING id
+      `.then((rows) => rows[0]);
     }
 
     if (!customer) {
@@ -62,20 +59,18 @@ export async function POST(request: Request) {
     }
 
     // Find or create open conversation
-    let { data: conversation } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("customer_id", customer.id)
-      .eq("status", "open")
-      .single();
+    let conversation = await sql`
+      SELECT id FROM conversations
+      WHERE customer_id = ${customer.id} AND status = 'open'
+      LIMIT 1
+    `.then((rows) => rows[0]);
 
     if (!conversation) {
-      const { data: newConv } = await supabase
-        .from("conversations")
-        .insert({ customer_id: customer.id, platform: "whatsapp" })
-        .select("id")
-        .single();
-      conversation = newConv;
+      conversation = await sql`
+        INSERT INTO conversations (customer_id, platform)
+        VALUES (${customer.id}, 'whatsapp')
+        RETURNING id
+      `.then((rows) => rows[0]);
     }
 
     if (!conversation) {
@@ -83,17 +78,16 @@ export async function POST(request: Request) {
     }
 
     // Insert customer message
-    await supabase.from("messages").insert({
-      conversation_id: conversation.id,
-      sender: "customer",
-      text,
-    });
+    await sql`
+      INSERT INTO messages (conversation_id, sender, text)
+      VALUES (${conversation.id}, 'customer', ${text})
+    `;
 
     // Update conversation timestamp
-    await supabase
-      .from("conversations")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("id", conversation.id);
+    await sql`
+      UPDATE conversations SET updated_at = NOW()
+      WHERE id = ${conversation.id}
+    `;
 
     // Generate AI reply
     let reply: string;
@@ -104,17 +98,16 @@ export async function POST(request: Request) {
     }
 
     // Insert AI reply
-    await supabase.from("messages").insert({
-      conversation_id: conversation.id,
-      sender: "ai",
-      text: reply,
-    });
+    await sql`
+      INSERT INTO messages (conversation_id, sender, text)
+      VALUES (${conversation.id}, 'ai', ${reply})
+    `;
 
     // Update conversation timestamp again
-    await supabase
-      .from("conversations")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("id", conversation.id);
+    await sql`
+      UPDATE conversations SET updated_at = NOW()
+      WHERE id = ${conversation.id}
+    `;
 
     return NextResponse.json({ reply });
   } catch (error) {

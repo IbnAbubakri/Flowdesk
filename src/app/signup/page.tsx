@@ -18,7 +18,6 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -38,65 +37,25 @@ export default function SignupPage() {
 
     setLoading(true);
 
-    try {
-      const checkRes = await fetch("/api/auth/check-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const checkData = await checkRes.json();
+    const { error: authError } = await signUp(email, password, businessName);
+    setLoading(false);
 
-      if (checkData.exists) {
-        setLoading(false);
+    if (authError) {
+      if (authError.message === "User already exists") {
         setError("An account with this email already exists. Please sign in instead.");
-        return;
+      } else {
+        setError(authError.message || "An unexpected error occurred. Please try again.");
       }
-
-      const { error: authError } = await signUp(email, password, businessName);
-      setLoading(false);
-
-      if (authError) {
-        setError(authError.message);
-        return;
-      }
-
-      setSuccess(true);
-    } catch {
-      setLoading(false);
-      setError("Something went wrong. Please try again.");
+      return;
     }
+
+    router.push("/dashboard");
   };
 
   if (authLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-muted-foreground text-sm">Loading...</div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full max-w-md text-center"
-        >
-          <div className="bg-card rounded-2xl border border-border p-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-success/10 text-success text-xl font-bold mb-4">
-              ✓
-            </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">Check your email</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
-            </p>
-            <Link href="/" className="text-primary text-sm font-medium hover:underline">
-              Back to sign in
-            </Link>
-          </div>
-        </motion.div>
       </div>
     );
   }

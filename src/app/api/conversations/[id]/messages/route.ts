@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 export async function GET(
   request: Request,
@@ -8,13 +8,11 @@ export async function GET(
   try {
     const { id } = params;
 
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("conversation_id", id)
-      .order("created_at", { ascending: true });
-
-    if (error) throw error;
+    const data = await sql`
+      SELECT * FROM messages
+      WHERE conversation_id = ${id}
+      ORDER BY created_at ASC
+    `;
 
     return NextResponse.json(data);
   } catch (error) {

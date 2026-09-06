@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
-      .from("business_data")
-      .select("key, value");
-
-    if (error) throw error;
+    const data = await sql`
+      SELECT key, value FROM business_data
+    `;
 
     const result: Record<string, string> = {};
     for (const row of data) {
@@ -30,11 +28,11 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Key is required" }, { status: 400 });
     }
 
-    const { error } = await supabase
-      .from("business_data")
-      .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
-
-    if (error) throw error;
+    await sql`
+      INSERT INTO business_data (key, value, updated_at)
+      VALUES (${key}, ${value}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+    `;
 
     return NextResponse.json({ ok: true });
   } catch (error) {

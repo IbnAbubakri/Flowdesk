@@ -37,9 +37,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (authError) {
-      setError(authError.message === "Invalid login credentials"
-        ? "Invalid email or password"
-        : authError.message);
+      setError(authError.message || "Invalid email or password");
       return;
     }
     router.push("/dashboard");

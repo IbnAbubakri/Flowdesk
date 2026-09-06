@@ -1,14 +1,15 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User, AuthError } from "@supabase/supabase-js";
-import { createSupabaseBrowser } from "@/lib/supabase";
+import { createContext, useContext, ReactNode } from "react";
+import { authClient } from "@/lib/auth-client";
+
+type AuthError = { code?: string; message?: string; status: number; statusText?: string } | null;
 
 interface AuthContextType {
-  user: User | null;
+  user: { id: string; email: string; name: string; image?: string | null } | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: AuthError | null }>;
-  signUp: (email: string, password: string, businessName: string) => Promise<{ error?: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error?: AuthError }>;
+  signUp: (email: string, password: string, businessName: string) => Promise<{ error?: AuthError }>;
   signOut: () => Promise<void>;
 }
 
@@ -21,51 +22,32 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const supabase = createSupabaseBrowser();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user ?? null;
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await authClient.signIn.email({ email, password });
     return { error };
   };
 
   const signUp = async (email: string, password: string, businessName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { error } = await authClient.signUp.email({
       email,
       password,
-      options: {
-        data: { business_name: businessName },
-      },
+      name: businessName,
     });
     return { error };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut();
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading: isPending, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
